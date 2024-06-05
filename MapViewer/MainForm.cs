@@ -171,10 +171,10 @@ namespace MapViewer
 
             try
             {
-                const int map_count = 0x1c4;
-
                 rom = ROM.FromFile(path);
-                int currentAddr = 0x08e2e0;
+                int map_count = rom.Offsets.NumberOfMaps;
+                int currentAddr = rom.Offsets.AreaInfo; //LOG2 INT
+                int mapNames = rom.Offsets.MapNames; //LOG2 INT
 
                 var itemsList = new List<MapItem>();
 
@@ -185,9 +185,9 @@ namespace MapViewer
                     rom.Skip(0xA);
                     int mapNameId = rom.ReadShort();
                     string mapName = string.Empty;
-                    if (mapNameId != 0)
+                    if (mapNames != 0 && mapNameId != 0)
                     {
-                        rom.PushPosition(0x06bce8 + (mapNameId * 4));
+                        rom.PushPosition(mapNames + (mapNameId * 4));
                         rom.Seek(rom.ReadPointer());
                         mapName = rom.ReadUnicodeString();
                         rom.PopPosition();

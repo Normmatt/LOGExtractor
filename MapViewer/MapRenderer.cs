@@ -116,7 +116,7 @@ namespace MapViewer
 
         public static Bitmap GetTilesetImage(ROM rom, int tileId, Color[] palette)
         {
-            const int start_addr = 0x179764;
+            int start_addr = rom.Offsets.TilesetImage; //LOG2 INT
             const int tile_per_image = 16 * 16;
             //const int num_images = 0xBB;
 
@@ -153,7 +153,7 @@ namespace MapViewer
 
         private static Color[] ReadBGPalette(ROM rom)
         {
-            const int bg_palette = 0x05632c;
+            int bg_palette = rom.Offsets.BGPalette; //LOG2 INT
             rom.PushPosition(bg_palette);
             var colors = new Color[256];
 
@@ -198,13 +198,13 @@ namespace MapViewer
                 return chunk;
             }
 
-            if (layerType != 0x8087)
+            /*if (layerType != 0x515d)
             {
                 // IDK
                 Debug.WriteLine($"unsupported layer type: {layerType:X4} @ 0x{address:X6}");
                 rom.PopPosition();
                 return new Bitmap(1, 1);
-            }
+            }*/
 
             rom.Skip(0x9);
             int offX = rom.ReadShort() / 4;
@@ -226,7 +226,14 @@ namespace MapViewer
                 offY *= -1;
             }
 
-            layerImage = new Bitmap((numCols * chunk_size_pixels) - offX, (numRows * chunk_size_pixels) - offY);
+            var w = (numCols * chunk_size_pixels) - offX;
+            var h = (numRows * chunk_size_pixels) - offY;
+            if (w <= 0) 
+                w = 1;
+            if (h <= 0) 
+                h = 1;
+
+            layerImage = new Bitmap(w, h);
             using var g = Graphics.FromImage(layerImage);
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
             g.PixelOffsetMode = PixelOffsetMode.Half;

@@ -13,16 +13,20 @@ namespace LOGExtractor.Gba
         private readonly byte[] mem;
         private int _position;
         private Stack<int> positionStack = new();
+        private Offsets _offsets;
 
         public int Position => _position;
         public int Length => mem.Length;
         public int Remaining => Length - _position;
+
+        public Offsets Offsets => _offsets;
 
         private string _DebuggerDisplay => $"0x08{_position:X6}";
 
         private ROM(byte[] _mem)
         {
             mem = _mem;
+            _offsets = new Offsets(_mem);
         }
 
         public static ROM FromFile(string filePath)
