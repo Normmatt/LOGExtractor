@@ -154,17 +154,33 @@ namespace MapViewer
         private static Color[] ReadBGPalette(ROM rom)
         {
             int bg_palette = rom.Offsets.BGPalette; //LOG2 INT
-            rom.PushPosition(bg_palette);
             var colors = new Color[256];
 
-            for (int i = 0; i < colors.Length; i++)
+            if (bg_palette == 0)
             {
-                int c = rom.ReadShort();
-                int r = ((c & 0x1F) * 0x21) >> 2;
-                int g = (((c >> 5) & 0x1F) * 0x21) >> 2;
-                int b = (((c >> 10) & 0x1F) * 0x21) >> 2;
+                //24bit palette
+                rom.PushPosition(rom.Offsets.BGPalette24Bit);
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    int r = rom.ReadByte();
+                    int g = rom.ReadByte();
+                    int b = rom.ReadByte();
 
-                colors[i] = Color.FromArgb(0xFF, r, g, b);
+                    colors[i] = Color.FromArgb(0xFF, r, g, b);
+                }
+            }
+            else
+            {
+                rom.PushPosition(bg_palette);
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    int c = rom.ReadShort();
+                    int r = ((c & 0x1F) * 0x21) >> 2;
+                    int g = (((c >> 5) & 0x1F) * 0x21) >> 2;
+                    int b = (((c >> 10) & 0x1F) * 0x21) >> 2;
+
+                    colors[i] = Color.FromArgb(0xFF, r, g, b);
+                }
             }
 
             colors[0] = Color.FromArgb(0, 0, 0, 0);
